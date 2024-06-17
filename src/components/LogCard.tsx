@@ -49,7 +49,7 @@ const LogCard = ({ data }) => {
           )}
           <span className="truncate">{data.timestamp}</span>
         </div>
-        <div className="flex-grow md:truncate w-64">{data.message}</div>
+        <div className="flex-grow truncate md:truncate w-64">{data.message}</div>
       </div>
       <div
         ref={contentRef}

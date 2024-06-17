@@ -1,16 +1,29 @@
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { CircleAlert, Download, Info, TriangleAlert } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+const loggroups: string[] = ["pyspark-1", "pyspark-2"];
+const loggroups1: string[] = ["elastic-1", "elastic-2"];
+
+const logGroup = [{
+  log_group_name: "Pyspark",
+  log_stream_name : ["pyspark-1", "pyspark-2"]
+},
+{
+  log_group_name: "Elastic",
+  log_stream_name : ["elastic-1", "elastic-2"]
+}
+]
 
 import {
   BarChart,
@@ -43,6 +56,25 @@ const CustomTooltip = ({ active, payload, label }) => {
 const LogPage = () => {
   // const [selectedTag, setSelectedTag] = useState("Query");
   const [data, setData] = useState(() => awslogs);
+  const [severity,setSeverity] = useState("")
+  const [period,setPeriod] = useState("")
+  // const [groupname,setGroupName] = useState("")
+  const [groupstream,setGroupStream] = useState("")
+
+  const handlePeriod = (value: string) => {
+    setPeriod(value)
+  }
+  const handleSeverity = (value: string) => {
+    setSeverity(value)
+  }
+  const handleGroupChange = (value: string) => {
+    setGroupStream(value)
+    console.log(value)
+  }
+
+  useEffect(function filterapi(){
+    console.log(severity,period,groupstream)
+  },[severity,period,groupstream])
 
   return (
     <div className="flex flex-col gap-2">
@@ -53,59 +85,22 @@ const LogPage = () => {
 
       <Separator className="mt-2" />
 
-      {/* <div>
-        <ul className="text-sm flex gap-4 relative transition ease-in-out">
-          <li
-            onClick={() => setSelectedTag("Query")}
-            className={cn(
-              "cursor-pointer p-2",
-              selectedTag === "Query" ? "text-blue-500 border-b-2" : "",
-            )}
-          >
-            Query
-          </li>
-          <li
-            onClick={() => setSelectedTag("Saved")}
-            className={cn(
-              "cursor-pointer p-2",
-              selectedTag === "Saved" ? "text-blue-500 border-b-2" : "",
-            )}
-          >
-            Saved
-          </li>
-          <li
-            onClick={() => setSelectedTag("Recent")}
-            className={cn(
-              "cursor-pointer p-2",
-              selectedTag === "Recent" ? "text-blue-500 border-b-2" : "",
-            )}
-          >
-            Recent
-          </li>
-          <div className="absolute"></div>
-        </ul>
-      </div> */}
-
-      {/* <div className="flex gap-4">
-        <Input className="" />
-        <Button>Run</Button>
-      </div> */}
-
       <div className="flex gap-2 justify-end">
-        <Select>
+        <Select onValueChange={handlePeriod}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Select period" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value="LSH">Last hour</SelectItem>
-              <SelectItem value="LSW">Last week</SelectItem>
-              <SelectItem value="LSM">Last month</SelectItem>
-              <SelectItem value="LSY">Last year</SelectItem>
+              <SelectItem value="last_hour">Last hour</SelectItem>
+              <SelectItem value="last_24_hours">Last 24 hrs</SelectItem>
+              <SelectItem value="last_week">Last week</SelectItem>
+              <SelectItem value="last_month">Last month</SelectItem>
+              {/* <SelectItem value="LSY">Last year</SelectItem> */}
             </SelectGroup>
           </SelectContent>
         </Select>
-        <Select>
+        <Select onValueChange={handleSeverity}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Severity" />
           </SelectTrigger>
@@ -132,17 +127,29 @@ const LogPage = () => {
             </SelectGroup>
           </SelectContent>
         </Select>
-        <Select>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="Logs Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectItem value="spark">Pyspark</SelectItem>
-              <SelectItem value="es">ElasticSearch</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+          <Select onValueChange={handleGroupChange} >
+            <SelectTrigger className="w-max">
+              <SelectValue placeholder="Log Groups" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup className="text-sm font-light">
+                <SelectLabel>Pyspark</SelectLabel>
+                {logGroup[0].log_stream_name.map((value) => (
+                  <SelectItem key={value} value={`${logGroup[0].log_group_name}:${value}`}>
+                    {value}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+              <SelectGroup className="text-sm font-light">
+                <SelectLabel>Elastic</SelectLabel>
+                {logGroup[1].log_stream_name.map((value) => (
+                  <SelectItem key={value} value={`${logGroup[1].log_group_name}:${value}`}>
+                    {value}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
       </div>
 
       <div className="flex flex-col mt-2 border rounded p-2">
@@ -188,10 +195,6 @@ const LogPage = () => {
           </ResponsiveContainer>
         </div>
       </div>
-
-      {/* <div className="w-full border">
-        <LogTable />
-      </div> */}
       <div className="flex flex-col gap-2">
         <Separator />
         {data && data.map((item) => <LogCard data={item} />)}
