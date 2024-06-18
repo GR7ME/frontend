@@ -2,10 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { api } from "@/lib/api-client";
 import { SettingType, settingsSchema } from "@/types/AuthTypes";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
-
 
 const SettingsPage = () => {
   const {
@@ -17,7 +17,17 @@ const SettingsPage = () => {
   });
 
   const onSubmit = (data: SettingType) => {
-    console.log(data);
+    const updateUserDetails = async () => {
+      const response = await api.patch("/auth/update-user/",data,{
+        headers: {
+          Authorization: "Token " + localStorage.getItem("token")
+        }
+      })
+      console.log(response)
+      localStorage.setItem("username",response.data.user.username)
+      localStorage.setItem("email",response.data.user.email)
+    } 
+    updateUserDetails()
   };
 
   return (
@@ -40,7 +50,8 @@ const SettingsPage = () => {
             <div className="flex flex-col gap-4">
               <Label>Username</Label>
               <Input
-                type="text"
+                defaultValue={localStorage.getItem("username") ?? ""}
+                placeholder="hello"
                 {...register("username", { required: true })}
                 className="w-full border rounded p-2 text-sm"
               />
@@ -53,6 +64,7 @@ const SettingsPage = () => {
             <div className="flex flex-col gap-4">
               <Label>Email</Label>
               <Input
+                defaultValue={localStorage.getItem("email") ?? ""}
                 type="email"
                 {...register("email")}
                 className="w-full border rounded p-2 text-sm"

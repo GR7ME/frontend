@@ -1,8 +1,7 @@
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { CircleAlert, Download, Info, TriangleAlert } from "lucide-react";
+import { CircleAlert, Info, TriangleAlert } from "lucide-react";
 import { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -12,18 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-const loggroups: string[] = ["pyspark-1", "pyspark-2"];
-const loggroups1: string[] = ["elastic-1", "elastic-2"];
-
-const logGroup = [{
-  log_group_name: "Pyspark",
-  log_stream_name : ["pyspark-1", "pyspark-2"]
-},
-{
-  log_group_name: "Elastic",
-  log_stream_name : ["elastic-1", "elastic-2"]
-}
-]
 
 import {
   BarChart,
@@ -36,10 +23,21 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { monthlyData } from "@/utils/month_data";
-import LogCard from "@/components/LogCard";
-import { awslogs } from "@/utils/logs_mock";
+import LogCard from "@/components/LogContainer/LogContainer";
+import {
+  getFilteredLogs,
+  period_choice,
+  severity_choice,
+} from "@/services/log";
+import { api } from "@/lib/api-client";
 
-const CustomTooltip = ({ active, payload, label }) => {
+interface CustomTooltipProps {
+  active: boolean | undefined;
+  payload: { payload: { timestamp: number; entries_number: number } }[] | null | undefined;
+  label: string | undefined;
+}
+
+const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const { timestamp, entries_number } = payload[0].payload;
     return (
@@ -55,32 +53,65 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 const LogPage = () => {
   // const [selectedTag, setSelectedTag] = useState("Query");
-  const [data, setData] = useState(() => awslogs);
-  const [severity,setSeverity] = useState("")
-  const [period,setPeriod] = useState("")
-  // const [groupname,setGroupName] = useState("")
-  const [groupstream,setGroupStream] = useState("")
+  const [data, setData] = useState([]);
+  const [logGroupDetails, setLogGroupDetails] = useState([]);
+  const [severity, setSeverity] = useState<severity_choice | "">("");
+  const [period, setPeriod] = useState<period_choice | "">("");
+  const [groupstream, setGroupStream] = useState("");
+  const [logStreamName, setLogStreamName] = useState("");
+  const [logGroupName, setLogGroupName] = useState("");
 
-  const handlePeriod = (value: string) => {
-    setPeriod(value)
-  }
-  const handleSeverity = (value: string) => {
-    setSeverity(value)
-  }
+  const handlePeriod = (value: period_choice | "") => {
+    setPeriod(value);
+  };
+
+  const handleSeverity = (value: severity_choice | "") => {
+    setSeverity(value);
+  };
+
   const handleGroupChange = (value: string) => {
-    setGroupStream(value)
-    console.log(value)
-  }
+    setGroupStream(value);
+  };
 
-  useEffect(function filterapi(){
-    console.log(severity,period,groupstream)
-  },[severity,period,groupstream])
+  console.log("rendered");
+
+  useEffect(() => {
+    const getLogDetails = async () => {
+      const response = await api.get("cloudwatch/logs/grouped/");
+      console.log(response.data)
+      setLogGroupDetails(response.data)
+    };
+    getLogDetails()
+    if (groupstream) {
+      const [group, stream] = groupstream.split(":");
+      setLogGroupName(group || "");
+      setLogStreamName(stream || "");
+    }
+  }, [groupstream]);
+
+  useEffect(() => {
+    const getLogs = async () => {
+      try {
+        const response = await getFilteredLogs({
+          period: period,
+          security_info: severity,
+          logGroupName: logGroupName,
+          logStreamName: logStreamName,
+        });
+        console.log(response);
+        setData(response);
+      } catch (error) {
+        console.error("Error fetching logs:", error);
+      }
+    };
+
+    getLogs();
+  }, [severity, period, logGroupName, logStreamName]);
 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex ">
         <Label>Log Explorer</Label>
-        {/* <Download className="w-4 h-4 mr-2" /> */}
       </div>
 
       <Separator className="mt-2" />
@@ -93,7 +124,7 @@ const LogPage = () => {
           <SelectContent>
             <SelectGroup>
               <SelectItem value="last_hour">Last hour</SelectItem>
-              <SelectItem value="last_24_hours">Last 24 hrs</SelectItem>
+              <SelectItem value="last_day">Last day</SelectItem>
               <SelectItem value="last_week">Last week</SelectItem>
               <SelectItem value="last_month">Last month</SelectItem>
               {/* <SelectItem value="LSY">Last year</SelectItem> */}
@@ -106,19 +137,19 @@ const LogPage = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value="info">
+              <SelectItem value="INFO">
                 <div className="flex justify-center items-center gap-2">
                   <Info className="w-4 h-4 text-gray-700" />
                   Info
                 </div>
               </SelectItem>
-              <SelectItem value="warn">
+              <SelectItem value="WARN">
                 <div className="flex justify-center items-center gap-2">
                   <CircleAlert className="w-4 h-4 text-yellow-700" />
                   Warning
                 </div>
               </SelectItem>
-              <SelectItem value="error">
+              <SelectItem value="ERROR">
                 <div className="flex justify-center items-center gap-2">
                   <TriangleAlert className="w-4 h-4 text-red-700" />
                   Error
@@ -127,29 +158,26 @@ const LogPage = () => {
             </SelectGroup>
           </SelectContent>
         </Select>
-          <Select onValueChange={handleGroupChange} >
-            <SelectTrigger className="w-max">
-              <SelectValue placeholder="Log Groups" />
-            </SelectTrigger>
-            <SelectContent>
+        <Select onValueChange={handleGroupChange}>
+          <SelectTrigger className="w-max">
+            <SelectValue placeholder="Log Groups" />
+          </SelectTrigger>
+          <SelectContent>
+            {logGroupDetails &&  logGroupDetails.map((data) =>
               <SelectGroup className="text-sm font-light">
-                <SelectLabel>Pyspark</SelectLabel>
-                {logGroup[0].log_stream_name.map((value) => (
-                  <SelectItem key={value} value={`${logGroup[0].log_group_name}:${value}`}>
-                    {value}
+                <SelectLabel>{data?.logGroupName}</SelectLabel>
+                {data?.logStreams.map((value) => (
+                  <SelectItem
+                    key={value.logStreamName}
+                    value={`${data?.logGroupName}:${value.logStreamName}`}
+                  >
+                    {value.logStreamName}
                   </SelectItem>
                 ))}
               </SelectGroup>
-              <SelectGroup className="text-sm font-light">
-                <SelectLabel>Elastic</SelectLabel>
-                {logGroup[1].log_stream_name.map((value) => (
-                  <SelectItem key={value} value={`${logGroup[1].log_group_name}:${value}`}>
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+            )}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="flex flex-col mt-2 border rounded p-2">

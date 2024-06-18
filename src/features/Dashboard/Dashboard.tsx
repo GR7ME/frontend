@@ -24,14 +24,15 @@ import {
   TrendingUp,
   TriangleAlert,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import downTrend from "@/assets/downtrend.svg";
 import upTrend from "@/assets/uptrend.svg";
 import { weekData } from "@/utils/week_data";
 import { recent_logs } from "@/utils/recent_logs";
 import { Separator } from "@/components/ui/separator";
-import LogCard from "@/components/LogCard";
+import LogCard from "@/components/LogContainer/LogContainer";
+import { api } from "@/lib/api-client";
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -54,13 +55,18 @@ const severityIcons = {
 };
 
 const DashboardPage = () => {
-  const [data, setData] = useState(() => recent_logs);
-  const [products, setProducts] = useState([]);
+  const [data, setData] = useState([]);
   const [isuptrend, setIsUptrend] = useState(false);
-  // const Total = countTotal(data);
-  // console.log(Total);
 
-  console.log(products);
+  useEffect(() => {
+    const getRecentLogs = async () => {
+      const result = await api.get("/cloudwatch/recent-logs");
+      setData(result.data);
+    };
+
+    getRecentLogs();
+  }, []);
+
   return (
     <div className="flex flex-col gap-2 p-2">
       <div className="w-full flex justify-between gap-2">
@@ -134,7 +140,7 @@ const DashboardPage = () => {
           <div className="border rounded p-4">
             <div>
               <Label className="text-xl">Recent Logs</Label>
-              <Separator className="my-2"/>
+              <Separator className="my-2" />
               <div className="flex flex-col gap-2">
                 {data && data.map((item) => <LogCard data={item} />)}
               </div>

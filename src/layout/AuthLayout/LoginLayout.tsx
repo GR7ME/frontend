@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import zph from "../assets/zph.webp"
+import zph from "@/assets/zph.webp"
 
 const LoginLayout = ()=>{
     return <>

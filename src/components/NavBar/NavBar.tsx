@@ -15,10 +15,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
-const loggroups: string[] = ["pyspark-1", "pyspark-2"];
+// const loggroups: string[] = ["pyspark-1", "pyspark-2"];
 
 const NavBar = () => {
   const navigate = useNavigate();
@@ -82,7 +82,7 @@ const NavBar = () => {
           </Label>
         </div>
         {/* <img src={zph} className="w-36" /> */}
-        <div className="">
+        {/* <div className="">
           <Select>
             <SelectTrigger className="w-max border-0">
               <SelectValue placeholder="Log Groups" />
@@ -98,7 +98,7 @@ const NavBar = () => {
               </SelectGroup>
             </SelectContent>
           </Select>
-        </div>
+        </div> */}
       </div>
       <div className="p-1 flex gap-4 mr-2 items-center">
         <div className="border rounded-full p-2">
@@ -120,7 +120,7 @@ const NavBar = () => {
                     <AvatarFallback>ZP</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col">
-                    <Label>Zakipoint</Label>
+                    <Label>{localStorage.getItem("username")}</Label>
                     <span className="text-xs opacity-50">Joined 2024</span>
                   </div>
                 </div>

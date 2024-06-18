@@ -1,4 +1,4 @@
-import AuthForm from "@/components/AuthForm";
+import AuthForm from "@/components/AuthForm/AuthForm";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SignupType, signUpSchema } from "@/types/AuthTypes";
