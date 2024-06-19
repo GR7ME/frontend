@@ -22,7 +22,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { monthlyData } from "@/utils/month_data";
+import { monthlyData,hourlyData,dayData,weeklydata } from "@/utils/month_data";
 import LogCard from "@/components/LogContainer/LogContainer";
 import {
   getFilteredLogs,
@@ -30,14 +30,9 @@ import {
   severity_choice,
 } from "@/services/log";
 import { api } from "@/lib/api-client";
+import { CustomTooltipProps } from "@/types/CustomToolTipsType";
 
-interface CustomTooltipProps {
-  active: boolean | undefined;
-  payload: { payload: { timestamp: number; entries_number: number } }[] | null | undefined;
-  label: string | undefined;
-}
-
-const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
     const { timestamp, entries_number } = payload[0].payload;
     return (
@@ -51,10 +46,18 @@ const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
   return null;
 };
 
+interface LogStream {
+  logStreamName: string;
+}
+
+interface LogGroup {
+  logGroupName: string;
+  logStreams: LogStream[];
+}
+
 const LogPage = () => {
-  // const [selectedTag, setSelectedTag] = useState("Query");
   const [data, setData] = useState([]);
-  const [logGroupDetails, setLogGroupDetails] = useState([]);
+  const [logGroupDetails, setLogGroupDetails] = useState<LogGroup[]>([]);
   const [severity, setSeverity] = useState<severity_choice | "">("");
   const [period, setPeriod] = useState<period_choice | "">("");
   const [groupstream, setGroupStream] = useState("");
@@ -78,10 +81,10 @@ const LogPage = () => {
   useEffect(() => {
     const getLogDetails = async () => {
       const response = await api.get("cloudwatch/logs/grouped/");
-      console.log(response.data)
-      setLogGroupDetails(response.data)
+      console.log(response.data);
+      setLogGroupDetails(response.data);
     };
-    getLogDetails()
+    getLogDetails();
     if (groupstream) {
       const [group, stream] = groupstream.split(":");
       setLogGroupName(group || "");
@@ -163,19 +166,20 @@ const LogPage = () => {
             <SelectValue placeholder="Log Groups" />
           </SelectTrigger>
           <SelectContent>
-            {logGroupDetails &&  logGroupDetails.map((data) =>
-              <SelectGroup className="text-sm font-light">
-                <SelectLabel>{data?.logGroupName}</SelectLabel>
-                {data?.logStreams.map((value) => (
-                  <SelectItem
-                    key={value.logStreamName}
-                    value={`${data?.logGroupName}:${value.logStreamName}`}
-                  >
-                    {value.logStreamName}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            )}
+            {logGroupDetails &&
+              logGroupDetails.map((data) => (
+                <SelectGroup className="text-sm font-light">
+                  <SelectLabel>{data?.logGroupName}</SelectLabel>
+                  {data?.logStreams.map((value) => (
+                    <SelectItem
+                      key={value.logStreamName}
+                      value={`${data?.logGroupName}:${value.logStreamName}`}
+                    >
+                      {value.logStreamName}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              ))}
           </SelectContent>
         </Select>
       </div>
@@ -187,7 +191,7 @@ const LogPage = () => {
         <div className="w-full h-44 my-4">
           <ResponsiveContainer>
             <BarChart
-              data={monthlyData}
+              data={hourlyData}
               margin={{
                 top: 5,
                 right: 30,
@@ -205,15 +209,12 @@ const LogPage = () => {
               <YAxis />
               <Tooltip
                 content={
-                  <CustomTooltip
-                    active={undefined}
-                    payload={undefined}
-                    label={undefined}
-                  />
+                  <CustomTooltip active={undefined} payload={undefined} />
                 }
               />
               <Legend />
               <Bar
+                barSize={60}
                 legendType="circle"
                 dataKey="entries_number"
                 fill="#8884d8"
@@ -223,7 +224,8 @@ const LogPage = () => {
           </ResponsiveContainer>
         </div>
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 mt-2">
+        <Label>Logs</Label>
         <Separator />
         {data && data.map((item) => <LogCard data={item} />)}
       </div>

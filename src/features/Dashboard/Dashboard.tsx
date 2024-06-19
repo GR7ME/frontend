@@ -29,34 +29,14 @@ import { useEffect, useState } from "react";
 import downTrend from "@/assets/downtrend.svg";
 import upTrend from "@/assets/uptrend.svg";
 import { weekData } from "@/utils/week_data";
-import { recent_logs } from "@/utils/recent_logs";
 import { Separator } from "@/components/ui/separator";
 import LogCard from "@/components/LogContainer/LogContainer";
 import { api } from "@/lib/api-client";
 
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    const { timestamp, entries_number } = payload[0].payload;
-    return (
-      <div className="text-xs custom-tooltip p-4 border shadow bg-white dark:bg-white dark:text-black rounded">
-        <p>{new Date(timestamp).toString()}</p>
-        <p className="text-[#8884d8]">Entries: {entries_number}</p>
-      </div>
-    );
-  }
-
-  return null;
-};
-
-const severityIcons = {
-  warn: <CircleAlert className="w-4 h-4 text-yellow-700" />,
-  error: <TriangleAlert className="w-4 h-4 text-red-700" />,
-  info: <Info className="w-4 h-4 text-gray-700" />,
-};
 
 const DashboardPage = () => {
   const [data, setData] = useState([]);
-  const [isuptrend, setIsUptrend] = useState(false);
+  const [totalLogs, setTotalLogs] = useState(0);
 
   useEffect(() => {
     const getRecentLogs = async () => {
@@ -65,40 +45,47 @@ const DashboardPage = () => {
     };
 
     getRecentLogs();
+
+    const getTotalLogs = async () => {
+      const result = await api.get("/cloudwatch/total-logs-count/");
+      setTotalLogs(result.data.total_logs_count);
+    };
+
+    getTotalLogs();
   }, []);
 
   return (
     <div className="flex flex-col gap-2 p-2">
-      <div className="w-full flex justify-between gap-2">
-        <Card className="w-max">
-          <CardHeader>
-            <div className="flex gap-4">
-              <div className="flex gap-4 h-max">
-                <CardTitle className="text-xl">Total Logs</CardTitle>
-                <div
-                  className={cn(
-                    "border flex gap-2 px-1 rounded items-center opacity-75 dark:opacity-100",
-                    isuptrend
-                      ? "text-green-700 border-green-700 bg-green-100 dark:bg-white dark:border-white"
-                      : "text-red-700 border-red-700 bg-red-100 dark:bg-white dark:border-white",
-                  )}
-                >
-                  {isuptrend ? (
-                    <TrendingUp className="w-4 h-4" />
-                  ) : (
-                    <TrendingDown className="w-4 h-4" />
-                  )}
-                  <Label className="dark:text-red">75%</Label>
-                </div>
-              </div>
-              <div>
-                <img src={isuptrend ? upTrend : downTrend} alt="downtrend" />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="flex flex-col">
-            <CardDescription>
-              <Label className="text-4xl">90,000</Label>
+      <div className="w-full flex flex-wrap justify-between gap-2">
+        <Card className="flex-grow min-w-[150px] p-2">
+          <CardContent className="flex flex-col p-4">
+            <CardDescription className="flex flex-col items-center">
+              <Label className="text-6xl md:text-8xl text-black">{totalLogs}</Label>
+              <Label className="text-xs">Total Logs</Label>
+            </CardDescription>
+          </CardContent>
+        </Card>
+        <Card className="flex-grow min-w-[150px] p-2">
+          <CardContent className="flex flex-col p-4 ">
+            <CardDescription className="flex flex-col items-center">
+              <Label className="text-6xl md:text-8xl text-yellow-800">{totalLogs}</Label>
+              <Label className="text-xs">Warn</Label>
+            </CardDescription>
+          </CardContent>
+        </Card>
+        <Card className="flex-grow min-w-[150px] p-2">
+          <CardContent className="flex flex-col p-4">
+            <CardDescription className="flex flex-col items-center">
+              <Label className="text-6xl md:text-8xl text-red-800">{totalLogs}</Label>
+              <Label className="text-xs">Error</Label>
+            </CardDescription>
+          </CardContent>
+        </Card>
+        <Card className="flex-grow min-w-[150px] p-2">
+          <CardContent className="flex flex-col p-4">
+            <CardDescription className="flex flex-col items-center">
+              <Label className="text-6xl md:text-8xl text-green-800">{totalLogs}</Label>
+              <Label className="text-xs">Info</Label>
             </CardDescription>
           </CardContent>
         </Card>
@@ -106,8 +93,8 @@ const DashboardPage = () => {
       <div className="flex flex-col gap-2 border rounded p-2">
         <Label className="text-xl">Analytics</Label>
         <Separator />
-        <div className="flex gap-2">
-          <div className="w-full h-64 my-4">
+        <div className="flex flex-col gap-2 xl:flex-row">
+          <div className="w-full xl:flex-1 h-64 my-4">
             <ResponsiveContainer>
               <LineChart
                 data={weekData}
@@ -137,12 +124,12 @@ const DashboardPage = () => {
               </LineChart>
             </ResponsiveContainer>
           </div>
-          <div className="border rounded p-4">
+          <div className="border rounded p-4 w-full xl:flex-1">
             <div>
               <Label className="text-xl">Recent Logs</Label>
               <Separator className="my-2" />
               <div className="flex flex-col gap-2">
-                {data && data.map((item) => <LogCard data={item} />)}
+                {data && data.map((item, index) => <LogCard key={index} data={item} />)}
               </div>
             </div>
           </div>

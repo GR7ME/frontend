@@ -1,12 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { DashboardIcon, ReaderIcon, GearIcon } from "@radix-ui/react-icons";
-import { Switch } from "@/components/ui/switch";
 
-import { useTheme } from "@/context/themeprovider";
 import { useNavigate } from "react-router-dom";
 
 const SideBar = () => {
-  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   return (
     <div className="md:p-2 border-r-2 ml-2 rounded-sm">
@@ -45,14 +42,6 @@ const SideBar = () => {
             <GearIcon />
             <span className="hidden md:block lg:block xl:block">Settings</span>
           </Button>
-        </li>
-        <li className="flex items-center gap-2 p-4">
-          <span className="text-sm text-center">Mode</span>
-          <Switch
-            onCheckedChange={() =>
-              theme == "light" ? setTheme("dark") : setTheme("light")
-            }
-          />
         </li>
       </ul>
     </div>

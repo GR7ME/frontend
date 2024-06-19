@@ -1,12 +1,3 @@
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Bell } from "lucide-react";
 import {
@@ -17,10 +8,18 @@ import {
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { Moon, Sun } from "lucide-react";
 
-// const loggroups: string[] = ["pyspark-1", "pyspark-2"];
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useTheme } from "@/context/themeprovider";
 
 const NavBar = () => {
+  const { setTheme } = useTheme();
   const navigate = useNavigate();
   return (
     <div className="flex justify-between items-center mx-2 my-2 border-b-2">
@@ -34,12 +33,48 @@ const NavBar = () => {
             xmlns="http://www.w3.org/2000/svg"
             className=""
           >
-            <circle className="dark:fill-white" cx="35.3548" cy="10.7527" r="2.60215" fill="#283570" />
-            <circle className="dark:fill-white" cx="29.6774" cy="26.8387" r="2.60215" fill="#283570" />
-            <circle className="dark:fill-white" cx="24.4731" cy="19.7419" r="2.60215" fill="#283570" />
-            <circle className="dark:fill-white" cx="11.2258" cy="34.4086" r="2.60215" fill="#283570" />
-            <circle className="dark:fill-white" cx="37.7204" cy="34.4086" r="2.60215" fill="#283570" />
-            <circle className="dark:fill-white" cx="11.2258" cy="19.7419" r="2.60215" fill="#283570" />
+            <circle
+              className="dark:fill-white"
+              cx="35.3548"
+              cy="10.7527"
+              r="2.60215"
+              fill="#283570"
+            />
+            <circle
+              className="dark:fill-white"
+              cx="29.6774"
+              cy="26.8387"
+              r="2.60215"
+              fill="#283570"
+            />
+            <circle
+              className="dark:fill-white"
+              cx="24.4731"
+              cy="19.7419"
+              r="2.60215"
+              fill="#283570"
+            />
+            <circle
+              className="dark:fill-white"
+              cx="11.2258"
+              cy="34.4086"
+              r="2.60215"
+              fill="#283570"
+            />
+            <circle
+              className="dark:fill-white"
+              cx="37.7204"
+              cy="34.4086"
+              r="2.60215"
+              fill="#283570"
+            />
+            <circle
+              className="dark:fill-white"
+              cx="11.2258"
+              cy="19.7419"
+              r="2.60215"
+              fill="#283570"
+            />
             <rect
               x="2"
               y="2"
@@ -81,33 +116,34 @@ const NavBar = () => {
             Zakipoint Health
           </Label>
         </div>
-        {/* <img src={zph} className="w-36" /> */}
-        {/* <div className="">
-          <Select>
-            <SelectTrigger className="w-max border-0">
-              <SelectValue placeholder="Log Groups" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup className="text-sm font-light">
-                <SelectLabel>Log Groups</SelectLabel>
-                {loggroups.map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div> */}
       </div>
       <div className="p-1 flex gap-4 mr-2 items-center">
-        <div className="border rounded-full p-2">
-          <Bell className="w-4 h-4" />
+        <div className="">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon" className="rounded-full">
+                <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                <span className="sr-only">Toggle theme</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setTheme("light")}>
+                Light
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>
+                Dark
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")}>
+                System
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <div>
           <Popover>
             <PopoverTrigger>
-              <Avatar className="border p-4 w-6 h-6 ">
+              <Avatar className="border p-4 w-8 h-8 ">
                 <AvatarImage src="" />
                 <AvatarFallback>ZP</AvatarFallback>
               </Avatar>
@@ -125,11 +161,13 @@ const NavBar = () => {
                   </div>
                 </div>
                 <div className="flex justify-center items-center">
-                  <Button className="" onClick={() => {
-                    navigate("/")
-                    localStorage.clear()
-                  }
-                  }>
+                  <Button
+                    className=""
+                    onClick={() => {
+                      navigate("/");
+                      localStorage.clear();
+                    }}
+                  >
                     Logout
                   </Button>
                 </div>
