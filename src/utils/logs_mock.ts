@@ -1,36 +1,3 @@
-type Logs = {
-  timestamp: string;
-  message: string;
-  ingestionTime: number;
-};
-
-interface KibanaEvent extends Logs {
-  process: {
-    pid: number;
-    uptime: number;
-  };
-  trace: {
-    id: string;
-  };
-  transaction: {
-    id: string;
-  };
-}
-
-
-type Kibanalogs = {
-  logGroupName: string;
-  logStreamName: string;
-  logEvents: KibanaEvent[];
-};
-
-
-type elasticlogs = {
-  logGroupName: string;
-  logStreamName: string;
-  logEvents: Logs[]
-}
-
 export const awslogs = [
       {
         logGroupName: "elasticlogs",

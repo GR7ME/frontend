@@ -1,5 +1,4 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -17,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useTheme } from "@/context/themeprovider";
+import { api } from "@/lib/api-client";
 
 const NavBar = () => {
   const { setTheme } = useTheme();
@@ -162,10 +162,14 @@ const NavBar = () => {
                 </div>
                 <div className="flex justify-center items-center">
                   <Button
-                    className=""
                     onClick={() => {
-                      navigate("/");
+                      api.post("/auth/logout/",{},{
+                        headers: {
+                          Authorization: "Token "+ localStorage.getItem("token")
+                        }
+                      })
                       localStorage.clear();
+                      navigate("/");
                     }}
                   >
                     Logout

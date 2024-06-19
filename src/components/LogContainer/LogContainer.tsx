@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import LogCard from "../LogCard/LogCard";
 import { Severity } from "@/types/Log-type";
+import { jsonData } from "@/types/logs";
 
 const bordercolor: Record<Severity, string> = {
   WARN: "border-yellow-400",
@@ -10,7 +11,8 @@ const bordercolor: Record<Severity, string> = {
   INFO: "border-green-700",
 };
 
-const LogContainer = ({ data }) => {
+const LogContainer = ({ data }: jsonData) => {
+  console.log(data)
   const [isClicked, setIsClicked] = useState(false);
   const [severity, setSeverity] = useState<Severity>("INFO");
 
@@ -33,10 +35,6 @@ const LogContainer = ({ data }) => {
       setMaxHeight("0px");
     }
   }, [data.message, isClicked]);
-
-  if (data.length == 0) {
-    return <div>No data to show</div>;
-  }
 
   return (
     data && (

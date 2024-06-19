@@ -2,10 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { api } from "@/lib/api-client";
-import { SettingType, settingsSchema } from "@/types/AuthTypes";
+import { SettingType, settingSchema } from "@/types/AuthTypes";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
+import { useToast } from "@/components/ui/use-toast";
+import { updateUser } from "@/services/user";
 
 const SettingsPage = () => {
   const {
@@ -13,21 +14,36 @@ const SettingsPage = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<SettingType>({
-    resolver: yupResolver(settingsSchema),
+    resolver: yupResolver(settingSchema),
   });
-
+  const { toast } = useToast();
   const onSubmit = (data: SettingType) => {
-    const updateUserDetails = async () => {
-      const response = await api.patch("/auth/update-user/",data,{
-        headers: {
-          Authorization: "Token " + localStorage.getItem("token")
+    const handleUpdateUser = async (data: SettingType) => {
+      try {
+        const response = await updateUser(data);
+        console.log("response: ", response);
+        if (response.success) {
+          localStorage.setItem("username", response.data.data.user.username);
+          localStorage.setItem("email", response.data.data.user.email);
+          toast({
+            title: response.data.data.message,
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: response.data,
+          });
         }
-      })
-      console.log(response)
-      localStorage.setItem("username",response.data.user.username)
-      localStorage.setItem("email",response.data.user.email)
-    } 
-    updateUserDetails()
+      } catch (error) {
+        console.log(error)
+        // toast({
+        //   variant: "destructive",
+        //   title: error
+        // });
+      }
+    };
+
+    handleUpdateUser(data);
   };
 
   return (
@@ -76,15 +92,29 @@ const SettingsPage = () => {
               )}
             </div>
             <div className="flex flex-col gap-4">
-              <Label>Password</Label>
+              <Label>Current Password</Label>
               <Input
                 type="password"
-                {...register("password", { required: true })}
+                {...register("current_password", { required: true })}
                 className="w-full border rounded p-2 text-sm"
               />
-              {errors.password && (
+              {errors.current_password && (
                 <Label className="text-destructive">
-                  {errors.password?.message}
+                  {errors.current_password?.message}
+                </Label>
+              )}
+            </div>
+            <div className="flex flex-col gap-4">
+              <Label>New Password</Label>
+              <Input
+                defaultValue={localStorage.getItem("email") ?? ""}
+                type="password"
+                {...register("new_password")}
+                className="w-full border rounded p-2 text-sm"
+              />
+              {errors.new_password && (
+                <Label className="text-destructive">
+                  {errors.new_password?.message}
                 </Label>
               )}
             </div>

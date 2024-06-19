@@ -22,7 +22,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { monthlyData,hourlyData,dayData,weeklydata } from "@/utils/month_data";
+import { dayData } from "@/utils/month_data";
 import LogCard from "@/components/LogContainer/LogContainer";
 import {
   getFilteredLogs,
@@ -56,6 +56,7 @@ interface LogGroup {
 }
 
 const LogPage = () => {
+  const token = localStorage.getItem("token")
   const [data, setData] = useState([]);
   const [logGroupDetails, setLogGroupDetails] = useState<LogGroup[]>([]);
   const [severity, setSeverity] = useState<severity_choice | "">("");
@@ -80,7 +81,11 @@ const LogPage = () => {
 
   useEffect(() => {
     const getLogDetails = async () => {
-      const response = await api.get("cloudwatch/logs/grouped/");
+      const response = await api.get("cloudwatch/logs/grouped/",{
+        headers: {
+          Authorization: "Token " + token,
+        },
+      });
       console.log(response.data);
       setLogGroupDetails(response.data);
     };
@@ -191,7 +196,7 @@ const LogPage = () => {
         <div className="w-full h-44 my-4">
           <ResponsiveContainer>
             <BarChart
-              data={hourlyData}
+              data={dayData}
               margin={{
                 top: 5,
                 right: 30,

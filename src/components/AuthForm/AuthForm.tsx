@@ -12,20 +12,22 @@ import {
   FieldErrors,
   SubmitHandler,
   UseFormHandleSubmit,
+  FieldValues,
+  Path
 } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 
-interface AuthProps {
+interface AuthProps<T extends FieldValues> {
   title: string;
   description: string;
-  onSubmit: SubmitHandler;
-  register: UseFormRegister;
-  handleSubmit: UseFormHandleSubmit;
-  errors: FieldErrors;
+  onSubmit: SubmitHandler<T>;
+  register: UseFormRegister<T>;
+  handleSubmit: UseFormHandleSubmit<T>;
+  errors: FieldErrors<T>;
   children?: React.ReactNode;
 }
 
-const AuthForm = ({
+const AuthForm = <T extends FieldValues>({
   title,
   description,
   onSubmit,
@@ -33,7 +35,7 @@ const AuthForm = ({
   handleSubmit,
   errors,
   children,
-}: AuthProps) => {
+}: AuthProps<T>) => {
   return (
     <Card className="w-80 md:w-96">
       <CardHeader>
@@ -48,13 +50,14 @@ const AuthForm = ({
               <Input
                 id="username"
                 placeholder="Username"
-                {...register("username")}
+                {...register("username" as Path<T>)}
               />
-              {errors.username && (
-                <Label className="text-destructive">
-                  {errors.username?.message}
-                </Label>
-              )}
+              {errors.username &&
+                typeof errors.username.message === "string" && (
+                  <Label className="text-destructive">
+                    {errors.username.message}
+                  </Label>
+                )}
             </div>
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="password">Password</Label>
@@ -62,11 +65,11 @@ const AuthForm = ({
                 id="password"
                 type="password"
                 placeholder="Password"
-                {...register("password")}
+                {...register("password" as Path<T>)}
               />
-              {errors.password && (
+              {errors.password && typeof errors.password.message === 'string' && (
                 <Label className="text-destructive">
-                  {errors.password?.message}
+                  {errors.password.message}
                 </Label>
               )}
             </div>

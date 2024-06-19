@@ -47,9 +47,7 @@ const Login = () => {
         navigate("/dashboard");
       }
     } catch (error) {
-      // Check if the error is an AxiosError
       if (axios.isAxiosError(error)) {
-        // Handle errors that occur during the API call
         const errorMessage =
           error.response?.data?.message ||
           "An unexpected error occurred. Please try again.";
@@ -60,7 +58,6 @@ const Login = () => {
           description: errorMessage,
         });
       } else {
-        // Handle non-Axios errors
         console.error("An unexpected error occurred:", error);
         toast({
           variant: "destructive",

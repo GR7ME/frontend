@@ -14,7 +14,7 @@ const ProtectedLayout = ({ children } : Props) => {
   useEffect(() => {
     const checkAuthentication = async () => {
       const response = await getUser();
-      if (response.valid) {
+      if (response.success) {
         setIsAuthenticated(true);
         console.log(response.data)
         localStorage.setItem("email",response.data.email)
