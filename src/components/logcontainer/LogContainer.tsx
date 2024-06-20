@@ -12,6 +12,7 @@ const bordercolor: Record<Severity, string> = {
 };
 
 const LogContainer = ({ data }: jsonData) => {
+  console.log("data: ", data);
   const [isClicked, setIsClicked] = useState(false);
   const [severity, setSeverity] = useState<Severity>("INFO");
 

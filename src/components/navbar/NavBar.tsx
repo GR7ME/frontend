@@ -28,7 +28,7 @@ const NavBar = () => {
   return (
     <div className="flex justify-between items-center mx-2 my-2 border-b-2">
       <div className="w-max flex items-center">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 cursor-pointer mx-6" onClick={() => navigate("/dashboard")}>
           <svg
             width="32"
             height="32"
@@ -86,37 +86,37 @@ const NavBar = () => {
               height="44"
               rx="7"
               stroke="#283570"
-              stroke-width="3"
-              stroke-linejoin="round"
+              strokeWidth="3"
+              strokeLinejoin="round"
               className="dark:stroke-white"
             />
             <path
               d="M11.2258 19.9785L35.5102 10.294"
               stroke="#283570"
-              stroke-width="2"
+              strokeWidth="2"
               className="dark:stroke-white"
             />
             <path
               d="M11.2258 34.6452L24.4731 19.7419"
               stroke="#283570"
-              stroke-width="2"
+              strokeWidth="2"
               className="dark:stroke-white"
             />
             <path
               d="M29.6774 27.0753L35.5914 10.2796"
               stroke="#283570"
-              stroke-width="2"
+              strokeWidth="2"
               className="dark:stroke-white"
             />
             <path
               d="M10.9892 34.9342L37.1224 34.1721"
               stroke="#283570"
-              stroke-width="2"
+              strokeWidth="2"
               className="dark:stroke-white"
             />
           </svg>
 
-          <Label className="font-bold italic text-[#283570] dark:text-white">
+          <Label className="font-bold italic text-[#283570] dark:text-white cursor-pointer">
             Zakipoint Health
           </Label>
         </div>

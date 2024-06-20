@@ -64,8 +64,6 @@ const SettingsPage = () => {
             <div className="flex flex-col gap-4">
               <Label>Username</Label>
               <Input
-                defaultValue={localStorage.getItem("username") ?? ""}
-                placeholder="hello"
                 {...register("username", { required: true })}
                 className="w-full border rounded p-2 text-sm"
               />
@@ -78,7 +76,6 @@ const SettingsPage = () => {
             <div className="flex flex-col gap-4">
               <Label>Email</Label>
               <Input
-                defaultValue={localStorage.getItem("email") ?? ""}
                 type="email"
                 {...register("email")}
                 className="w-full border rounded p-2 text-sm"

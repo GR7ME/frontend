@@ -67,9 +67,9 @@ const DashboardPage = () => {
           </CardContent>
         </Card>
         {severityCountData &&
-          Object.entries(severityCountData).map((item) => {
+          Object.entries(severityCountData).map((item,index) => {
             return (
-              <Card className="flex-grow min-w-[150px] p-2">
+              <Card className="flex-grow min-w-[150px] p-2" key={index}>
                 <CardContent className="flex flex-col p-4">
                   <CardDescription className="flex flex-col items-center">
                     <Label
@@ -77,7 +77,7 @@ const DashboardPage = () => {
                         "text-6xl md:text-8xl",
                         text_color[
                           item[0].toLowerCase() as keyof SeverityTextColor
-                        ], // Explicitly cast to keyof SeverityTextColor
+                        ],
                       )}
                     >
                       {item[1]}
