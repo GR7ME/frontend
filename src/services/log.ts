@@ -18,6 +18,7 @@ interface getFilteredLogsInput {
   security_info: severity_choice | "";
   logStreamName: string;
   logGroupName: string;
+  token: string;
 }
 
 export const getFilteredLogs = async ({
@@ -25,10 +26,9 @@ export const getFilteredLogs = async ({
   security_info,
   logGroupName,
   logStreamName,
+  token,
 }: getFilteredLogsInput) => {
   const params = new URLSearchParams();
-  const token = localStorage.getItem("token");
-
 
   if (period) {
     params.append("period", period);
