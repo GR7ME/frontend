@@ -20,7 +20,7 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    const message = error.response?.data?.message || error.message;
+    const message = error.response?.data?.message || error.response?.data?.detail || error.message;
 
     console.log("Error occured")
     console.log("message : ",message)

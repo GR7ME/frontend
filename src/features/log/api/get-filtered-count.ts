@@ -1,10 +1,10 @@
 import { api } from "@/lib/api-client";
 
-// export enum severity_choice {
-//   WARN = "WARN",
-//   INFO = "INFO",
-//   ERROR = "ERROR",
-// }
+export enum severity_choice {
+  WARN = "WARN",
+  INFO = "INFO",
+  ERROR = "ERROR",
+}
 
 export enum period_choice {
   LAST_DAY = "last_day",
@@ -15,17 +15,17 @@ export enum period_choice {
 
 interface getFilteredLogsInput {
 interval_type: period_choice | "";
-//   security_info: severity_choice | "";
-//   logStreamName: string;
-//   logGroupName: string;
+  security_info: severity_choice | "";
+  logStreamName: string;
+  logGroupName: string;
   token: string;
 }
 
 export const getFilteredCount = async ({
     interval_type,
-    // security_info,
-    // logGroupName,
-    // logStreamName,
+    security_info,
+    logGroupName,
+    logStreamName,
     token,
   }: getFilteredLogsInput) => {
     const params = new URLSearchParams();
@@ -33,15 +33,15 @@ export const getFilteredCount = async ({
     if (interval_type) {
       params.append("interval_type", interval_type);
     }
-    // if (security_info) {
-    //   params.append("securityinfo", security_info);
-    // }
-    // if (logGroupName) {
-    //   params.append("logGroupName", logGroupName);
-    // }
-    // if (logStreamName) {
-    //   params.append("logStreamName", logStreamName);
-    // }
+    if (security_info) {
+      params.append("securityinfo", security_info);
+    }
+    if (logGroupName) {
+      params.append("logGroupName", logGroupName);
+    }
+    if (logStreamName) {
+      params.append("logStreamName", logStreamName);
+    }
   
     try {
       const response = await api.get(

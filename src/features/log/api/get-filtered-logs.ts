@@ -19,6 +19,7 @@ interface getFilteredLogsInput {
   logStreamName: string;
   logGroupName: string;
   token: string;
+  pageCount: number;
 }
 
 export const getFilteredLogs = async ({
@@ -26,9 +27,11 @@ export const getFilteredLogs = async ({
     security_info,
     logGroupName,
     logStreamName,
-    token,
+    pageCount,
+    token
   }: getFilteredLogsInput) => {
     const params = new URLSearchParams();
+    console.log("getfilteredlogs input", period, security_info, logGroupName, logStreamName);
   
     if (period) {
       params.append("period", period);
@@ -42,6 +45,9 @@ export const getFilteredLogs = async ({
     if (logStreamName) {
       params.append("logStreamName", logStreamName);
     }
+    if (pageCount) {
+      params.append("page", String(pageCount))
+    }
   
     try {
       const response = await api.get(
@@ -52,8 +58,8 @@ export const getFilteredLogs = async ({
           },
         },
       );
-      console.log(response);
-      return response.data;
+      console.log("getfilteredlogs response", response.data);
+      return response;
     } catch (error) {
       console.error("Error fetching filtered logs:", error);
       throw error;

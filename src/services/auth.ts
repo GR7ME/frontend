@@ -1,5 +1,8 @@
 import { api } from "@/lib/api-client";
 import axios, { AxiosError } from "axios";
+interface ErrorResponse {
+  message?: string;
+}
 
 export const getUser = async (token: string) => {
 
@@ -72,7 +75,7 @@ export const logOut = async (token: string): Promise<{ success: boolean; message
     }
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      const axiosError = error as AxiosError;
+      const axiosError = error as AxiosError<ErrorResponse>;
 
       if (axiosError.response) {
         console.error('Request failed with status:', axiosError.response.status);

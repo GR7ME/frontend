@@ -27,12 +27,22 @@ import {
   getFilteredLogs,
   period_choice,
   severity_choice,
-} from "@/services/log";
+} from "./api/get-filtered-logs";
 import { CustomTooltipProps } from "@/types/customtooltipcount";
 import { useToken } from "@/hooks/useToken";
 import { getLogDetails } from "./api/get-log-details";
 import { getFilteredCount } from "./api/get-filtered-count";
 import { LogData } from "@/types/logs";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { cn } from "@/lib/utils";
 
 const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
   if (active && payload && payload.length) {
@@ -94,6 +104,47 @@ const LogPage = () => {
   const [logGroupName, setLogGroupName] = useState("");
   const { token } = useToken();
   const [filteredCountData, setFilteredCountData] = useState([]);
+  const [previousPage, setPreviousPage] = useState<string>("");
+  const [nextPage, setNextPage] = useState<string | null>(null);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const previousPageHandler = () => {
+    if (previousPage) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const nextPageHandler = () => {
+    if (nextPage) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const renderPageNumbers = () => {
+    const totalPages = Math.ceil(totalCount / 10);
+    const pages = [];
+
+    for (
+      let i = Math.max(1, currentPage - 1);
+      i <= Math.min(totalPages, currentPage + 1);
+      i++
+    ) {
+      pages.push(
+        <PaginationItem key={i}>
+          <PaginationLink
+            href="#"
+            isActive={currentPage === i}
+            onClick={() => setCurrentPage(i)}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>,
+      );
+    }
+
+    return pages;
+  };
 
   const handlePeriod = (value: period_choice | "") => {
     setPeriod(value);
@@ -115,25 +166,44 @@ const LogPage = () => {
     }
     const getAll = async () => {
       setLogGroupDetails(await getLogDetails(token));
-      setData(
-        await getFilteredLogs({
-          period: period,
+
+      const logsResponse = await getFilteredLogs({
+        period: period,
+        security_info: severity,
+        logGroupName: logGroupName,
+        logStreamName: logStreamName,
+        pageCount: currentPage,
+        token,
+      });
+
+      console.log("logs response: ", logsResponse);
+      setData(logsResponse.data.results);
+      setTotalCount(logsResponse.data.count);
+      setNextPage(logsResponse.data.next);
+      setPreviousPage(logsResponse.data.previous);
+
+      setFilteredCountData(
+        await getFilteredCount({
+          interval_type: period,
           security_info: severity,
           logGroupName: logGroupName,
           logStreamName: logStreamName,
           token,
         }),
       );
-      setFilteredCountData(
-        await getFilteredCount({
-          interval_type: period,
-          token,
-        }),
-      );
     };
     getAll();
-  }, [groupstream, logGroupName, logStreamName, period, severity, token]);
-  console.log("filtered count: ", filteredCountData);
+  }, [
+    groupstream,
+    logGroupName,
+    logStreamName,
+    period,
+    severity,
+    token,
+    currentPage,
+  ]);
+  console.log("filtered data: ", filteredCountData);
+  console.log("data: ", data);
 
   return (
     <div className="flex flex-col gap-2">
@@ -190,7 +260,7 @@ const LogPage = () => {
           </SelectTrigger>
           <SelectContent>
             {logGroupDetails &&
-              logGroupDetails.map((data,index) => (
+              logGroupDetails.map((data, index) => (
                 <SelectGroup className="text-sm font-light" key={index}>
                   <SelectLabel>{data?.logGroupName}</SelectLabel>
                   {data?.logStreams.map((value) => (
@@ -216,7 +286,7 @@ const LogPage = () => {
             <BarChart
               data={
                 period === "last_hour" || period === "last_day"
-                  ? filteredCountData.slice(1)
+                  ? filteredCountData.slice(0)
                   : filteredCountData
               }
               margin={{
@@ -230,9 +300,7 @@ const LogPage = () => {
               <XAxis
                 dataKey={(data) => {
                   if (period === "last_week") {
-                    return `${new Date(data.interval).getDate()}-${
-                      new Date(data.interval).getDate() + 1
-                    }`;
+                    return `${new Date(data.interval).getDate()}`
                   } else if (period === "last_hour") {
                     return `${new Date(data.interval).getMinutes()}-${
                       (new Date(data.interval).getMinutes() + 5) % 60
@@ -242,13 +310,10 @@ const LogPage = () => {
                       new Date(data.interval).getHours() + 1
                     }`;
                   } else if (period === "last_month") {
-                    return `${new Date(data.interval).getDate()}-${
-                      (new Date(data.interval).getDate() + 1) % 32
-                    }`;
+                    return `${new Date(data.interval).getDate()}`
                   } else {
-                    return `${new Date(data.interval).getDate()}-${
-                      new Date(data.interval).getDate() + 1
-                    }`;
+                    return `${new Date(data.interval).getDate()}
+                    `;
                   }
                 }}
                 interval="preserveStartEnd"
@@ -277,14 +342,40 @@ const LogPage = () => {
       </div>
       <div className="flex flex-col gap-2 mt-2">
         <Label>Logs</Label>
-        <Separator className="mt-2"/>
-        {data && data.length > 0 ? (
-          data.map((item) => <LogCard key={item.id} data={item} />)
-        ) : (
-          <div className="w-full h-56 my-4 flex items-center justify-center">
-            No data to show
-          </div>
-        )}
+        <Separator className="mt-2" />
+        <div className="flex flex-col gap-2">
+          {data && data.length > 0 ? (
+            data.map((item) => <LogCard key={item.id} data={item} />)
+          ) : (
+            <div className="w-full h-56 my-4 flex items-center justify-center">
+              No data to show
+            </div>
+          )}
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  className={cn(
+                    previousPage ? "" : "pointer-events-none opacity-20",
+                  )}
+                  onClick={previousPageHandler}
+                />
+              </PaginationItem>
+              {renderPageNumbers()}
+              <PaginationItem>
+                <PaginationEllipsis className="opacity-50" />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext
+                  className={cn(
+                    nextPage ? "" : "pointer-events-none opacity-20",
+                  )}
+                  onClick={nextPageHandler}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
       </div>
     </div>
   );
