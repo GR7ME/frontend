@@ -10,7 +10,7 @@ function authRequestInterceptor(config: InternalAxiosRequestConfig) {
 }
 
 export const api = Axios.create({
-  baseURL: "http://127.0.0.1:8000/api",
+  baseURL: "http://localhost:8000/api",
 });
 
 api.interceptors.request.use(authRequestInterceptor);
@@ -21,9 +21,13 @@ api.interceptors.response.use(
   },
   (error) => {
     const message = error.response?.data?.message || error.response?.data?.detail || error.message;
-
-    console.log("Error occured")
-    console.log("message : ",message)
+    if(error.isAxiosError && message == "Network Error") {
+      toast({
+        variant: "destructive",
+        title: 'Error Occured!!',
+        description: "Backend Server is not running",
+      });
+    }
     
     toast({
       variant: "destructive",
