@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form";
 import { useToast } from "@/components/ui/use-toast";
 import { updateUser } from "./api/update-user-profile";
 import { useToken } from "@/hooks/useToken";
+import { useUser } from "@/hooks/useUser";
 
 const SettingsPage = () => {
   const {
@@ -19,6 +20,7 @@ const SettingsPage = () => {
   });
   const { toast } = useToast();
   const { token } = useToken()
+  const { user } = useUser()
   const onSubmit = (data: SettingType) => {
     const handleUpdateUser = async (data: SettingType) => {
       try {
@@ -65,6 +67,7 @@ const SettingsPage = () => {
               <Label>Username</Label>
               <Input
                 {...register("username", { required: true })}
+                defaultValue={user.username}
                 className="w-full border rounded p-2 text-sm"
               />
               {errors.username && (
@@ -78,6 +81,7 @@ const SettingsPage = () => {
               <Input
                 type="email"
                 {...register("email")}
+                defaultValue={user.email}
                 className="w-full border rounded p-2 text-sm"
               />
               {errors.email && (
