@@ -4,6 +4,9 @@ import { Label } from "@/components/ui/label";
 import { SignupType, signUpSchema } from "@/types/AuthTypes";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useToast } from "@/components/ui/use-toast";
+import { createUser } from "./api/create-user";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
   const {
@@ -13,8 +16,28 @@ const SignUp = () => {
   } = useForm<SignupType>({
     resolver: yupResolver(signUpSchema),
   });
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const onSubmit = (data: SignupType) => console.log(data);
+  const onSubmit = async (data: SignupType) => {
+    if (data.password != data.confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Passwords do not match",
+      })
+    }
+    try {
+      const response = await createUser(data);
+      toast({
+        title: "Success",
+        description: response.data.message || "user successfully created",
+      });
+      navigate("/auth/login");
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
     <AuthForm
